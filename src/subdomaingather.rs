@@ -44,3 +44,8 @@ enum Source {
     VirusTotal,
     Wayback,
 }
+
+struct Config {
+    timeout: u64,
+    concurrency: usize,
+}
