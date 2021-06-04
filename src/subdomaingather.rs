@@ -49,3 +49,12 @@ struct Config {
     timeout: u64,
     concurrency: usize,
 }
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            timeout: 15,
+            concurrency: 200,
+        }
+    }
+}
