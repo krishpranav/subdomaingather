@@ -18,3 +18,29 @@ use std::sync::Arc;
 use strum_macros::EnumString;
 use tokio::sync::mpsc;
 use tracing::{info, warn};
+
+const CHAN_SIZE: usize = 255;
+
+#[derive(Debug, Eq, PartialEq, Hash, EnumString)]
+enum Source {
+    AlienVault,
+    AnubisDB,
+    BinaryEdge,
+    C99,
+    CertSpotter,
+    Chaos,
+    Crtsh,
+    Facebook,
+    HackerTarget,
+    Intelx,
+    PassiveTotal,
+    SecurityTrails,
+    SonarSearch,
+    Spyse,
+    Sublister,
+    ThreatCrowd,
+    ThreatMiner,
+    UrlScan,
+    VirusTotal,
+    Wayback,
+}
