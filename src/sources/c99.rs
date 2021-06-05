@@ -27,3 +27,8 @@ impl Creds {
 struct C99Reslt {
     subdomains: Option<Sub<C99Item>>,
 }
+
+#[derive(Debug, Deserialize)]
+struct C99Item {
+    subdomain: String,
+}
