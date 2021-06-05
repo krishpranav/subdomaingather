@@ -49,3 +49,9 @@ impl From<String> for SubError {
         SubError::Msg(err)
     }
 }
+
+impl From<reqwest::Error> for SubError {
+    fn from(err: reqwest::Error) -> Self {
+        SubError::ReqwestError(err)
+    }
+}
