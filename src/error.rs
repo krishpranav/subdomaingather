@@ -41,3 +41,5 @@ impl fmt::Display for SubError {
         }
     }
 }
+
+impl Error for SubError{}
