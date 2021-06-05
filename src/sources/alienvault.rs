@@ -64,3 +64,46 @@ impl DataSource for AlienVault {
         Err(SubError::SourceError("AlienVault".into()))
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use matches::matches;
+    use tokio::sync::mpsc::channel;
+
+    #[test]
+    fn url_builder() {
+        let correct_uri = "https://otx.alienvault.com/api/v1/indicators/domain/\
+        hackerone.com/passive_dns";
+
+        assert_eq!(
+            correct_uri,
+            AlienVault::default().build_url("hackerone.com")
+        );
+    }
+
+    // Checks to see if the run function returns subdomains
+    #[tokio::test]
+    async fn returns_results() {
+        let (tx, mut rx) = channel(1);
+        let host = Arc::new("hackerone.com".to_string());
+        let _ = AlienVault::default().run(host, tx).await.unwrap();
+        let mut results = Sub::new();
+        for r in rx.recv().await {
+            results.extend(r)
+        }
+
+        assert!(!results.is_empty());
+    }
+
+    #[tokio::test]
+    async fn handle_no_results() {
+        let (tx, _rx) = channel(1);
+        let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
+        assert!(matches!(
+            AlienVault::default().run(host, tx).await.err().unwrap(),
+            SubError::SourceError(_)
+        ))
+    }
+}
