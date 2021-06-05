@@ -1,0 +1,1 @@
+#![allow(clippy::rc_buffer)]
