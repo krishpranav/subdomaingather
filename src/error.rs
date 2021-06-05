@@ -43,3 +43,9 @@ impl fmt::Display for SubError {
 }
 
 impl Error for SubError{}
+
+impl From<String> for SubError {
+    fn from(err: String) -> Self {
+        SubError::Msg(err)
+    }
+}
