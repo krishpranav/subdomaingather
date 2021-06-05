@@ -55,3 +55,9 @@ impl From<reqwest::Error> for SubError {
         SubError::ReqwestError(err)
     }
 }
+
+impl From<tokio::task::JoinError> for SubError {
+    fn from(err: tokio::task::JoinError) -> Self {
+        SubError::JoinError(err)
+    }
+}
