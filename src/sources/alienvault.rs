@@ -32,3 +32,16 @@ impl InfoSubdomain for AlienvaultResult {
 pub struct AlienVault {
     client: Client,
 }
+
+impl AlienVault {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+
+    fn build_url(&self, host: &str) -> String {
+        format!(
+            "https://otx.alienvault.com/api/v1/indicators/domain/{}/passive_dns",
+            host
+        )
+    }
+}
