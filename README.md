@@ -20,7 +20,7 @@ $ subdomaingather -d hackerone.com
 **Collecting data only on a specific subdomain**
 
 If you only want to collect results related to a specific subdomain you can use
-the `--subs-only` flag. This will cause vita to run on the actual domain and not
+the `--subs-only` flag. This will cause subdomaingather to run on the actual domain and not
 the root domain. Results will be filtered to anything that ends with the input
 domain or domains.
 ```
@@ -42,8 +42,8 @@ $ subdomaingather < /path/to/domains.txt
 **Outputting results as they're received**
 
 You can output results as they arrive as opposed to once all sources finish using
-the `--flush` flag. You might want to use this flag when you're running vita on a
-small vps without much memory. When this flag is active vita will not remove duplicates,
+the `--flush` flag. You might want to use this flag when you're running subdomaingather on a
+small vps without much memory. When this flag is active subdomaingather will not remove duplicates,
 so you may want to pipe it through something like `sort -u`.
 ```
 $ subdomaingather -d hackerone.com --flush

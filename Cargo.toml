@@ -7,7 +7,7 @@ edition = "2018"
 [[bin]]
 bench = false
 path = "src/bin/main.rs"
-name = "vita"
+name = "subdomaingather"
 
 [dependencies]
 reqwest = {version = "0.10.7", features = ["json", "gzip"]}
