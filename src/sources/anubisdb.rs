@@ -10,3 +10,9 @@ use tracing::{info, trace, warn};
 struct AnubisResult {
     results: Value,
 }
+
+impl AnubisResult {
+    fn new(results: Value) -> Self {
+        Self { results }
+    }
+}
