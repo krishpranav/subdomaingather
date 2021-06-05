@@ -25,3 +25,8 @@ impl IntoSubdomain for AnubisResult {
         }
     }
 }
+
+#[derive(Default, Clone)]
+pub struct AnubisDB {
+    client: Client,
+}
