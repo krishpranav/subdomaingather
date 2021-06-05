@@ -75,3 +75,16 @@ impl Default for Runner {
         }
     }
 }
+
+impl Runner {
+    
+    pub fn concurrency(mut self, limit: usize) -> Self {
+        self.config.concurrency = limit;
+        self
+    }
+
+    pub fn timeout(mut self, duration: u64) -> Self {
+        self.config.timeout = duration;
+        self
+    }
+}
