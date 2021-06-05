@@ -32,3 +32,9 @@ struct BinaryEdgeResponse {
     total: i32,
     events: Sub<String>,
 }
+
+impl IntoSubdomain for BinaryEdgeResponse {
+    fn subdomains(&self) -> Sub<String> {
+        self.events.iter().map(|s| s.to_owned()).collect()
+    }
+}
