@@ -30,3 +30,13 @@ impl IntoSubdomain for AnubisResult {
 pub struct AnubisDB {
     client: Client,
 }
+
+impl AnubisDB {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+    
+    fn build_url(&self, host: &str) -> String {
+        format!("https://jldc.me/anubis/subdomains/{}", host)
+    }
+}
