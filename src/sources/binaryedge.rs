@@ -43,3 +43,22 @@ impl IntoSubdomain for BinaryEdgeResponse {
 pub struct BinaryEdge {
     client: Client,
 }
+
+impl BinaryEdge {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+
+    fn build_url(&self, host: &str, page: Options<i32>) -> String {
+        match page {
+            Some(p) => format!(
+                "https://api.binaryedge.io/v2/query/domains/subdomain/{}?page={}",
+                 host, p
+            ),
+            None => format!(
+                "https://api.binaryedge.io/v2/query/domains/subdomain/{}",
+                 host
+            ),
+        }
+    }
+}
