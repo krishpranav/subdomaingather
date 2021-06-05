@@ -27,3 +27,8 @@ impl InfoSubdomain for AlienvaultResult {
             .collect()
     }
 }
+
+#[derive(Default, Clone)]
+pub struct AlienVault {
+    client: Client,
+}
