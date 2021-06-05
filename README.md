@@ -6,10 +6,10 @@ A simple tool to gather subdomains from passive sources build in rust
 
 # Installation
 ```
-git clone https://github.com/krishpranav/subdomaingather
-cd subdomaingather
-cargo build --release
-./target/release/subdomaingather --version
+$ git clone https://github.com/krishpranav/subdomaingather
+$ cd subdomaingather
+$ cargo build --release
+$ ./target/release/subdomaingather --version
 ```
 
 # Usage
