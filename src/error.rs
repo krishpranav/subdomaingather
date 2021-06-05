@@ -67,3 +67,9 @@ impl From<std::io::Error> for SubError {
         SubError::IoError(err)
     }
 }
+
+impl From<std::num::ParseIntError> for SubError {
+    fn from(_: std::num::ParseIntError) -> Self {
+        SubError::ParseError
+    }
+}
