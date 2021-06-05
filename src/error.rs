@@ -20,15 +20,24 @@ pub enum SubError {
 impl fmt::Display for SubError {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            SubError::SourceError(s) => write!(f, "couldn't fetch data from {}", s)
+            SubError::SourceError(s) => write!(f, "couldn't fetch data from {}", s),
             SubError::AuthError(s) => {
                 write!(
                     f,
-                    "error authentication to {} or may have hit rate limits",
+                    "error authenticating to {} or may have hit rate limits",
                     s
                 )
             }
-            
+            SubError::UnsetKeys(v) => write!(f, "error reading environment variables {:?}", v),
+            SubError::EmptyResults => write!(f, "returned no results"),
+            SubError::CrobatError => {
+                write!(f, "got error when trying to pull results from crobat")
+            }
+            SubError::ParseError => write!(f, "got error trying to parse cli args"),
+            SubError::Msg(s) => write!(f, "got error {}", s),
+            SubError::ReqwestError(ref err) => err.fmt(f),
+            SubError::JoinError(ref err) => err.fmt(f),
+            SubError::IoError(ref err) => err.fmt(f),
         }
     }
 }
