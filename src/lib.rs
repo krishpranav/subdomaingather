@@ -13,3 +13,8 @@ pub mod sources;
 pub mod subdomain;
 
 pub (crate) const QUEUE_SIZE: usize = 1024;
+
+#[async_trait]
+trait DataSource: Send + Sync {
+    async fn run(&self, host: Arc<String>, mut tx: mpsc::Sender<Vec<String>>) -> Result<()>;
+}
