@@ -38,3 +38,8 @@ impl IntoSubdomain for BinaryEdgeResponse {
         self.events.iter().map(|s| s.to_owned()).collect()
     }
 }
+
+#[derive(Default, Clone])]
+pub struct BinaryEdge {
+    client: Client,
+}
