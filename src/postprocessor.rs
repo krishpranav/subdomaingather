@@ -63,3 +63,11 @@ impl PostProcessor {
         }
     }
 }
+
+pub struct PostProcessorIter<'a, I>
+where
+    I: Iterator,
+{
+    cleaner: &'a PostProcessor,
+    inner: I,
+}
