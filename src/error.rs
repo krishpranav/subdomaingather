@@ -16,3 +16,19 @@ pub enum SubError {
     CrobatError,
     EmptyResults,
 }
+
+impl fmt::Display for SubError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            SubError::SourceError(s) => write!(f, "couldn't fetch data from {}", s)
+            SubError::AuthError(s) => {
+                write!(
+                    f,
+                    "error authentication to {} or may have hit rate limits",
+                    s
+                )
+            }
+            
+        }
+    }
+}
