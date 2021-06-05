@@ -22,3 +22,8 @@ impl Creds {
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+struct C99Reslt {
+    subdomains: Option<Sub<C99Item>>,
+}
