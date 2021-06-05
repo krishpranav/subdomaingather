@@ -7,3 +7,9 @@ enum Filter {
     SubOnly,
     RootOnly,
 }
+
+impl Default for Filter {
+    fn default() -> Self {
+        Self::RootOnly
+    }
+}
