@@ -9,3 +9,6 @@ use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
 use tracing::{info, trace, warn};
 
+struct Creds {
+    key: String,
+}
