@@ -14,3 +14,13 @@ struct Creds {
     token: String,
 }
 
+
+impl Creds {
+    pub fn read_crds() -> Result<Self> {
+        dotenv().ok();
+        match env::var("BINARYEDGE_TOKEN") {
+            Ok(token) => ok(Self { token }),
+            Err(_) => Err(SubError::UnsetKeys(vec!["BINARYEDGE_TOKEN".into()])),
+        }
+    }
+}
