@@ -13,3 +13,9 @@ impl Default for Filter {
         Self::RootOnly
     }
 }
+
+#[derive(Default)]
+pub struct PostProcessor {
+    roots: HashSet<String>,
+    filter: Filter,
+}
