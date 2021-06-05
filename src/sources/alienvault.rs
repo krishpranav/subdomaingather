@@ -18,3 +18,12 @@ struct AlienvaultResult {
     passive_dns: Sb<Subdomain>,
     count: i32,
 }
+
+impl InfoSubdomain for AlienvaultResult {
+    fn subdomains(&self) -> Sb<String> {
+        self.passive_dns
+            .iter()
+            .map(|s| s.hostname.to_owned())
+            .collect()
+    }
+}
