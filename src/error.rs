@@ -61,3 +61,9 @@ impl From<tokio::task::JoinError> for SubError {
         SubError::JoinError(err)
     }
 }
+
+impl From<std::io::Error> for SubError {
+    fn from(err: std::io::Error) -> Self {
+        SubError::IoError(err)
+    }
+}
