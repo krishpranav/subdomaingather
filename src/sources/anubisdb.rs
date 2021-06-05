@@ -16,3 +16,12 @@ impl AnubisResult {
         Self { results }
     }
 }
+
+impl IntoSubdomain for AnubisResult {
+    fn subdomains(&self) -> Sub<String> {
+        match self.results.as_array() {
+            Some(array) => array.iter().map(|s| s.to_string()).collect(),
+            None => Sub::new(),
+        }
+    }
+}
