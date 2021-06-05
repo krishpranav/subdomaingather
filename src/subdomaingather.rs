@@ -58,3 +58,9 @@ impl Default for Config {
         }
     }
 }
+
+pub struct Runner {
+    client: Client,
+    sources: HashMap<Source, Arc<dyn DataSource>>,
+    config: Config,
+}
