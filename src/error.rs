@@ -73,3 +73,9 @@ impl From<std::num::ParseIntError> for SubError {
         SubError::ParseError
     }
 }
+
+impl From<Box<dyn Error + Sync + std::marker::Send>> for SubError {
+    fn from(_: Box<dyn Error + Sync + std::marker::Send>) -> Self {
+        SubError::CrobatError
+    }
+}
