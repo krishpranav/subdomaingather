@@ -32,3 +32,13 @@ struct C99Reslt {
 struct C99Item {
     subdomain: String,
 }
+
+impl IntoSubdomain for C99Result {
+    fn subdomains(&self) -> Vec<String> {
+        self.subdomains
+            .iter()
+            .flatten()
+            .map(|s| s.subdomain.to_string())
+            .collect()
+    }
+}
