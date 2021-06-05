@@ -64,3 +64,14 @@ pub struct Runner {
     sources: HashMap<Source, Arc<dyn DataSource>>,
     config: Config,
 }
+
+impl Default for Runner {
+    fn default() -> Self {
+        let config = Config::default();
+        Self {
+            client: client!(config.timeout, config.timeout),
+            sources: HashMap::new(),
+            config,
+        }
+    }
+}
