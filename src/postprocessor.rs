@@ -2,7 +2,6 @@ use addr::DomainName;
 use std::collections::HashSet;
 use std::hash::Hash;
 
-
 enum Filter {
     SubOnly,
     RootOnly,
@@ -19,7 +18,6 @@ pub struct PostProcessor {
     roots: HashSet<String>,
     filter: Filter,
 }
-
 
 impl PostProcessor {
     pub fn any_root<I: IntoIterator<Item = String>>(&mut self, hosts: I) -> &mut Self {
@@ -71,3 +69,36 @@ where
     cleaner: &'a PostProcessor,
     inner: I,
 }
+
+impl<'a, I> Iterator for PostProcessorIter<'a, I>
+where
+    I: Iterator,
+    I::Item: Hash + Eq + AsRef<str>,
+{
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(d) = self.inner.next() {
+            let cleaned = PostProcessor::strip_invalid(d.as_ref());
+            if self.cleaner.is_relevant(&cleaned) {
+                return Some(cleaned);
+            }
+        }
+        None
+    }
+}
+
+pub trait CleanExt: Iterator {
+    fn clean(self, postprocessor: &PostProcessor) -> PostProcessorIter<Self>
+    where
+        Self::Item: Hash + Eq + AsRef<str>,
+        Self: Sized,
+    {
+        PostProcessorIter {
+            cleaner: postprocessor,
+            inner: self,
+        }
+    }
+}
+
+impl<I: Iterator> CleanExt for I {}
