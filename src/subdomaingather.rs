@@ -77,7 +77,6 @@ impl Default for Runner {
 }
 
 impl Runner {
-    
     pub fn concurrency(mut self, limit: usize) -> Self {
         self.config.concurrency = limit;
         self
@@ -86,5 +85,166 @@ impl Runner {
     pub fn timeout(mut self, duration: u64) -> Self {
         self.config.timeout = duration;
         self
+    }
+
+    pub fn exclude(mut self, excluded: &[&str]) -> Self {
+        if !excluded.is_empty() {
+            excluded.iter().for_each(|s| {
+                if let Ok(source) = Source::from_str(s) {
+                    info!("excluding {:?}", source);
+                    self.sources.remove(&source);
+                };
+            });
+        }
+
+        self
+    }
+
+    pub fn free_sources(mut self) -> Self {
+        let free: Vec<(Source, Arc<dyn DataSource>)> = vec![
+            (
+                Source::AnubisDB,
+                Arc::new(AnubisDB::new(self.client.clone())),
+            ),
+            (
+                Source::AlienVault,
+                Arc::new(AlienVault::new(self.client.clone())),
+            ),
+            (
+                Source::CertSpotter,
+                Arc::new(CertSpotter::new(self.client.clone())),
+            ),
+            (
+                Source::ThreatCrowd,
+                Arc::new(ThreatCrowd::new(self.client.clone())),
+            ),
+            (
+                Source::VirusTotal,
+                Arc::new(VirusTotal::new(self.client.clone())),
+            ),
+            (
+                Source::ThreatMiner,
+                Arc::new(ThreatMiner::new(self.client.clone())),
+            ),
+            (
+                Source::Sublister,
+                Arc::new(Sublister::new(self.client.clone())),
+            ),
+            (
+                Source::HackerTarget,
+                Arc::new(HackerTarget::new(self.client.clone())),
+            ),
+            (
+                Source::SonarSearch,
+                Arc::new(SonarSearch::new(self.client.clone())),
+            ),
+            (Source::Wayback, Arc::new(Wayback::new(self.client.clone()))),
+            (Source::UrlScan, Arc::new(UrlScan::new(self.client.clone()))),
+            (Source::Crtsh, Arc::new(Crtsh::new(self.client.clone()))),
+        ];
+
+        self.sources.extend(free.into_iter());
+        self
+    }
+
+    pub fn all_sources(mut self) -> Self {
+        let all: Vec<(Source, Arc<dyn DataSource>)> = vec![
+            (
+                Source::AnubisDB,
+                Arc::new(AnubisDB::new(self.client.clone())),
+            ),
+            (
+                Source::AlienVault,
+                Arc::new(AlienVault::new(self.client.clone())),
+            ),
+            (
+                Source::CertSpotter,
+                Arc::new(CertSpotter::new(self.client.clone())),
+            ),
+            (
+                Source::ThreatCrowd,
+                Arc::new(ThreatCrowd::new(self.client.clone())),
+            ),
+            (
+                Source::VirusTotal,
+                Arc::new(VirusTotal::new(self.client.clone())),
+            ),
+            (
+                Source::ThreatMiner,
+                Arc::new(ThreatMiner::new(self.client.clone())),
+            ),
+            (
+                Source::Sublister,
+                Arc::new(Sublister::new(self.client.clone())),
+            ),
+            (
+                Source::SecurityTrails,
+                Arc::new(SecurityTrails::new(self.client.clone())),
+            ),
+            (
+                Source::HackerTarget,
+                Arc::new(HackerTarget::new(self.client.clone())),
+            ),
+            (
+                Source::SonarSearch,
+                Arc::new(SonarSearch::new(self.client.clone())),
+            ),
+            (
+                Source::BinaryEdge,
+                Arc::new(BinaryEdge::new(self.client.clone())),
+            ),
+            (
+                Source::PassiveTotal,
+                Arc::new(PassiveTotal::new(self.client.clone())),
+            ),
+            (
+                Source::Facebook,
+                Arc::new(Facebook::new(self.client.clone())),
+            ),
+            (Source::Spyse, Arc::new(Spyse::new(self.client.clone()))),
+            (Source::C99, Arc::new(C99::new(self.client.clone()))),
+            (Source::Intelx, Arc::new(Intelx::new(self.client.clone()))),
+            (Source::Wayback, Arc::new(Wayback::new(self.client.clone()))),
+            (Source::UrlScan, Arc::new(UrlScan::new(self.client.clone()))),
+            (Source::Crtsh, Arc::new(Crtsh::new(self.client.clone()))),
+            (Source::Chaos, Arc::new(Chaos::new(self.client.clone()))),
+        ];
+
+        self.sources.extend(all.into_iter());
+        self
+    }
+
+    pub async fn run(self, hosts: HashSet<String>) -> Result<impl Stream<Item = Vec<String>>> {
+        let (tx, rx) = mpsc::channel::<Vec<String>>(CHAN_SIZE);
+        let sources = Arc::new(self.sources);
+        let max_concurrent = self.config.concurrency;
+
+        let tx2 = tx.clone();
+        tokio::spawn(async move {
+            let mut futures = FuturesUnordered::new();
+            for host in hosts.into_iter() {
+                let host = Arc::new(host);
+
+                if futures.len() >= max_concurrent {
+                    futures.next().await;
+                }
+
+                for source in sources.values() {
+                    let source = Arc::clone(source);
+                    let host = Arc::clone(&host);
+                    let tx = tx2.clone();
+                    futures.push(tokio::spawn(async move { source.run(host, tx).await }));
+                }
+            }
+
+            while let Some(res) = futures.next().await {
+                if let Err(e) = res {
+                    warn!("got error {} when trying to recv remaining futures", e)
+                }
+            }
+        });
+
+        drop(tx);
+        Ok(rx)
     }
 }
