@@ -24,3 +24,11 @@ impl Creds {
         }
     }
 }
+
+#[derive(Deserialize)]
+struct BinaryEdgeResponse {
+    page: i32,
+    pagesize: i32,
+    total: i32,
+    events: Sub<String>,
+}
