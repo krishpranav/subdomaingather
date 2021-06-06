@@ -30,3 +30,12 @@ struct ChaosResult {
     domain: String,
     subdomains: Vec<String>,
 }
+
+impl IntoSubdomain for ChaosResult {
+    fn subdomains(&self) -> Vec<String> {
+        self.subdomains
+            .iter()
+            .map(|s| format!("{}.{}", s, self.domain))
+            .collect()
+    }
+}
