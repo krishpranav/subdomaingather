@@ -18,14 +18,14 @@ impl Creds {
         dotenv().ok();
         match env::var("C99_KEY") {
             Ok(key) => Ok(Self { key }),
-            Err(_) => Err(SubError::UnsetKeys(Sub!["C99_KEY".into()])),
+            Err(_) => Err(SubError::UnsetKeys(vec!["C99_KEY".into()])),
         }
     }
 }
 
 #[derive(Debug, Deserialize)]
 struct C99Result {
-    subdomains: Option<Sub<C99Item>>,
+    subdomains: Option<Vec<C99Item>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -34,7 +34,7 @@ struct C99Item {
 }
 
 impl IntoSubdomain for C99Result {
-    fn subdomains(&self) -> Sub<String> {
+    fn subdomains(&self) -> Vec<String> {
         self.subdomains
             .iter()
             .flatten()
@@ -63,7 +63,7 @@ impl C99 {
 
 #[async_trait]
 impl DataSource for C99 {
-    async fn run(&self, host: Arc<String>, mut tx: Sender<Sub<String>>) -> Result<()> {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
         trace!("fetching data from C99 for: {}", &host);
         let api_key = match Creds::read_creds() {
             Ok(creds) => creds.key,
@@ -100,7 +100,7 @@ mod tests {
         let (tx, mut rx) = channel(1);
         let host = Arc::new("hackerone.com".to_owned());
         let _ = C99::default().run(host, tx).await;
-        let mut results = Sub::new();
+        let mut results = Vec::new();
         for r in rx.recv().await {
             results.extend(r)
         }

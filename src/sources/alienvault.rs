@@ -7,7 +7,6 @@ use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
 use tracing::{info, trace, warn};
 
-
 #[derive(Deserialize, Debug)]
 struct Subdomain {
     hostname: String,
@@ -15,12 +14,12 @@ struct Subdomain {
 
 #[derive(Deserialize, Debug)]
 struct AlienvaultResult {
-    passive_dns: Sub<Subdomain>,
+    passive_dns: Vec<Subdomain>,
     count: i32,
 }
 
-impl InfoSubdomain for AlienvaultResult {
-    fn subdomains(&self) -> Sub<String> {
+impl IntoSubdomain for AlienvaultResult {
+    fn subdomains(&self) -> Vec<String> {
         self.passive_dns
             .iter()
             .map(|s| s.hostname.to_owned())
@@ -48,7 +47,7 @@ impl AlienVault {
 
 #[async_trait]
 impl DataSource for AlienVault {
-    async fn run(&self, host: Arc<String>, mut tx: Sender<Sub<String>>) -> Result<()> {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
         trace!("fetching data from alienvault for: {}", &host);
         let uri = self.build_url(&host);
         let resp: AlienvaultResult = self.client.get(&uri).send().await?.json().await?;
@@ -64,7 +63,6 @@ impl DataSource for AlienVault {
         Err(SubError::SourceError("AlienVault".into()))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -89,7 +87,7 @@ mod tests {
         let (tx, mut rx) = channel(1);
         let host = Arc::new("hackerone.com".to_string());
         let _ = AlienVault::default().run(host, tx).await.unwrap();
-        let mut results = Sub::new();
+        let mut results = Vec::new();
         for r in rx.recv().await {
             results.extend(r)
         }

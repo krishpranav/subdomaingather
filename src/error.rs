@@ -7,7 +7,7 @@ pub type Result<T> = std::result::Result<T, SubError>;
 pub enum SubError {
     SourceError(String),
     AuthError(String),
-    UnsetKeys(Sub<String>),
+    UnsetKeys(Vec<String>),
     ReqwestError(reqwest::Error),
     JoinError(tokio::task::JoinError),
     IoError(std::io::Error),
@@ -42,7 +42,7 @@ impl fmt::Display for SubError {
     }
 }
 
-impl Error for SubError{}
+impl Error for SubError {}
 
 impl From<String> for SubError {
     fn from(err: String) -> Self {
@@ -74,6 +74,7 @@ impl From<std::num::ParseIntError> for SubError {
     }
 }
 
+// Monkey patch until I add custom error type to Crobat
 impl From<Box<dyn Error + Sync + std::marker::Send>> for SubError {
     fn from(_: Box<dyn Error + Sync + std::marker::Send>) -> Self {
         SubError::CrobatError

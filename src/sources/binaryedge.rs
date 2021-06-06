@@ -19,7 +19,7 @@ impl Creds {
         dotenv().ok();
         match env::var("BINARYEDGE_TOKEN") {
             Ok(token) => Ok(Self { token }),
-            Err(_) => Err(VitaError::UnsetKeys(sub!["BINARYEDGE_TOKEN".into()])),
+            Err(_) => Err(SubError::UnsetKeys(vec!["BINARYEDGE_TOKEN".into()])),
         }
     }
 }
@@ -29,11 +29,11 @@ struct BinaryEdgeResponse {
     page: i32,
     pagesize: i32,
     total: i32,
-    events: Sub<String>,
+    events: Vec<String>,
 }
 
 impl IntoSubdomain for BinaryEdgeResponse {
-    fn subdomains(&self) -> Sub<String> {
+    fn subdomains(&self) -> Vec<String> {
         self.events.iter().map(|s| s.to_owned()).collect()
     }
 }
@@ -67,10 +67,10 @@ impl BinaryEdge {
 // but for the small amount of pages it probably doesn't matter
 #[async_trait]
 impl DataSource for BinaryEdge {
-    async fn run(&self, host: Arc<String>, mut tx: Sender<Sub<String>>) -> Result<()> {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
         trace!("fetching data from binaryedge for: {}", &host);
-        let mut tasks = Sub::new();
-        let mut results = Sub::new();
+        let mut tasks = Vec::new();
+        let mut results = Vec::new();
         let resp = next_page(self.client.clone(), host.clone(), None).await?;
 
         // insert subdomains from first page.
@@ -103,7 +103,7 @@ impl DataSource for BinaryEdge {
         }
 
         warn!("no results for {} from BinaryEdge", &host);
-        Err(VitaError::SourceError("BinaryEdge".into()))
+        Err(SubError::SourceError("BinaryEdge".into()))
     }
 }
 
@@ -127,7 +127,7 @@ async fn next_page(
     }
 
     info!("binaryedge returned authentication error");
-    Err(VitaError::AuthError("BinaryEdge".into()))
+    Err(SubError::AuthError("BinaryEdge".into()))
 }
 
 #[cfg(test)]
@@ -143,7 +143,7 @@ mod tests {
         let (tx, mut rx) = channel(1);
         let host = Arc::new("hackerone.com".to_string());
         let _ = BinaryEdge::default().run(host, tx).await;
-        let mut results = Sub::new();
+        let mut results = Vec::new();
         for r in rx.recv().await {
             results.extend(r)
         }
@@ -157,7 +157,7 @@ mod tests {
         let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
         assert!(matches!(
             BinaryEdge::default().run(host, tx).await.err().unwrap(),
-            VitaError::SourceError(_)
+            SubError::SourceError(_)
         ))
     }
 
@@ -168,7 +168,7 @@ mod tests {
         let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
         assert!(matches!(
             BinaryEdge::default().run(host, tx).await.err().unwrap(),
-            VitaError::AuthError(_)
+            SubError::AuthError(_)
         ));
     }
 }

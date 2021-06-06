@@ -18,10 +18,10 @@ impl AnubisResult {
 }
 
 impl IntoSubdomain for AnubisResult {
-    fn subdomains(&self) -> Sub<String> {
+    fn subdomains(&self) -> Vec<String> {
         match self.results.as_array() {
             Some(array) => array.iter().map(|s| s.to_string()).collect(),
-            None => Sub::new(),
+            None => Vec::new(),
         }
     }
 }
@@ -43,7 +43,7 @@ impl AnubisDB {
 
 #[async_trait]
 impl DataSource for AnubisDB {
-    async fn run(&self, host: Arc<String>, mut tx: Sender<Sub<String>>) -> Result<()> {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
         trace!("fetching data from anubisdb for: {}", &host);
         let uri = self.build_url(&host);
         let resp: Option<Value> = self.client.get(&uri).send().await?.json().await?;
@@ -58,7 +58,7 @@ impl DataSource for AnubisDB {
         }
 
         warn!("No results for {} from AnubisDB", &host);
-        Err(VitaError::SourceError("AnubisDB".into()))
+        Err(SubError::SourceError("AnubisDB".into()))
     }
 }
 
@@ -80,21 +80,21 @@ mod tests {
         let (tx, mut rx) = channel(1);
         let host = Arc::new("hackerone.com".to_string());
         let _ = AnubisDB::default().run(host, tx).await.unwrap();
-        let mut results = Sub::new();
+        let mut results = Vec::new();
         for r in rx.recv().await {
             results.extend(r)
         }
         assert!(!results.is_empty());
     }
 
-    //TODO: should match VitaError not string message
+    //TODO: should match SubError not string message
     #[tokio::test]
     async fn handle_no_results() {
         let (tx, _rx) = channel(1);
         let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
         assert!(matches!(
             AnubisDB::default().run(host, tx).await.err().unwrap(),
-            VitaError::SourceError(_)
+            SubError::SourceError(_)
         ));
     }
 }

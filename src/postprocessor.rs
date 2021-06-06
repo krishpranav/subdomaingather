@@ -2,8 +2,11 @@ use addr::DomainName;
 use std::collections::HashSet;
 use std::hash::Hash;
 
+/// Represents the filtering applied to the output
 enum Filter {
+    /// Return any result that matches the same subdomain
     SubOnly,
+    /// Return any result that has the same root domain
     RootOnly,
 }
 
@@ -12,6 +15,7 @@ impl Default for Filter {
         Self::RootOnly
     }
 }
+
 
 #[derive(Default)]
 pub struct PostProcessor {
@@ -30,11 +34,13 @@ impl PostProcessor {
         self
     }
 
+    /// Sets the `PostProcessor` to return any result which matches the same subdomain
     pub fn any_subdomain<I: IntoIterator<Item = String>>(&mut self, hosts: I) -> &mut Self {
         self.roots.extend(hosts);
         self.filter = Filter::SubOnly;
         self
     }
+
 
     fn strip_invalid<T: AsRef<str> + std::fmt::Display>(domain: T) -> String {
         domain

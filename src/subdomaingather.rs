@@ -77,16 +77,19 @@ impl Default for Runner {
 }
 
 impl Runner {
+    /// Sets the limit of concurrent tasks
     pub fn concurrency(mut self, limit: usize) -> Self {
         self.config.concurrency = limit;
         self
     }
 
+    /// Sets the request timeout
     pub fn timeout(mut self, duration: u64) -> Self {
         self.config.timeout = duration;
         self
     }
 
+    /// Excludes a collection sources from data collection
     pub fn exclude(mut self, excluded: &[&str]) -> Self {
         if !excluded.is_empty() {
             excluded.iter().for_each(|s| {
@@ -100,7 +103,9 @@ impl Runner {
         self
     }
 
+    /// Sets the sources to be all those which do not require an api key to use.
     pub fn free_sources(mut self) -> Self {
+        // Client uses Arc internally
         let free: Vec<(Source, Arc<dyn DataSource>)> = vec![
             (
                 Source::AnubisDB,
@@ -214,6 +219,7 @@ impl Runner {
         self
     }
 
+    /// Fetches data from the sources concurrently
     pub async fn run(self, hosts: HashSet<String>) -> Result<impl Stream<Item = Vec<String>>> {
         let (tx, rx) = mpsc::channel::<Vec<String>>(CHAN_SIZE);
         let sources = Arc::new(self.sources);
@@ -237,6 +243,7 @@ impl Runner {
                 }
             }
 
+            // Get the remaining futures
             while let Some(res) = futures.next().await {
                 if let Err(e) = res {
                     warn!("got error {} when trying to recv remaining futures", e)
@@ -244,6 +251,7 @@ impl Runner {
             }
         });
 
+        // explicitly drop the remaning sender
         drop(tx);
         Ok(rx)
     }
