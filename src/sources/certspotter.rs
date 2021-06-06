@@ -36,3 +36,26 @@ impl CertSpotter {
         )
     }
 }
+
+
+#[async_trait]
+impl DataSource for CertSpotter {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
+        trace!("fetching data from certspotter for: {}", &host);
+        let uri = self.build_url(&host);
+        let resp: Option<Vec<CertSpotterResult>> =
+            self.client.get(&uri).send().await?.json().await?;
+
+        if let Some(data) = resp {
+            let subdomains = data.subdomains();
+            if !subdomains.is_empty() {
+                info!("Discovered {} results for: {}", &subdomains.len(), &host);
+                let _ = tx.send(subdomains).await;
+                return Ok(());
+            }
+        }
+
+        warn!("no results for {} from CertSpotter", &host);
+        Err(VitaError::SourceError("CertSpotter".into()))
+    }
+}
