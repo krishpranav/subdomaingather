@@ -6,3 +6,8 @@ use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
 use tracing::{info, trace, warn};
+
+#[derive(Debug, Deserialize)]
+struct CertSpotterResult {
+    dns_names: Vec<String>,
+}
