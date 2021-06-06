@@ -22,3 +22,17 @@ impl IntoSubdomain for Vec<CertSpotterResult> {
 pub struct CertSpotter {
     client: Client,
 }
+
+impl CertSpotter {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+
+    fn build_url(&self, host: &str) -> String {
+        format!(
+            "https://api.certspotter.com/v1/issuances?domain={}\
+        &include_subdomains=true&expand=dns_names",
+            host
+        )
+    }
+}
