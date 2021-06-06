@@ -11,3 +11,9 @@ use tracing::{info, trace, warn};
 struct CertSpotterResult {
     dns_names: Vec<String>,
 }
+
+impl IntoSubdomain for Vec<CertSpotterResult> {
+    fn subdomains(&self) -> Vec<String> {
+        self.iter().flat_map(|d| d.dns_names.to_owned()).collect()
+    }
+}
