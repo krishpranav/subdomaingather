@@ -39,3 +39,18 @@ impl IntoSubdomain for ChaosResult {
             .collect()
     }
 }
+
+#[derive(Default, Clone)]
+pub struct Chaos {
+    client: Client,
+}
+
+impl Chaos {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+
+    fn build_url(&self, host: &str) -> String {
+        format!("https://dns.projectdiscovery.io/dns/{}/subdomains", host)
+    }
+}
