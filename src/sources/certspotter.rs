@@ -59,3 +59,44 @@ impl DataSource for CertSpotter {
         Err(VitaError::SourceError("CertSpotter".into()))
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use matches::matches;
+    use tokio::sync::mpsc::channel;
+
+    #[test]
+    fn url_builder() {
+        let correct_uri = "https://api.certspotter.com/v1/issuances?domain=hackerone.com\
+        &include_subdomains=true&expand=dns_names";
+        assert_eq!(
+            correct_uri,
+            CertSpotter::default().build_url("hackerone.com")
+        );
+    }
+
+    // Checks to see if the run function returns subdomains
+    #[tokio::test]
+    async fn returns_results() {
+        let (tx, mut rx) = channel(1);
+        let host = Arc::new("hackerone.com".to_owned());
+        let _ = CertSpotter::default().run(host, tx).await;
+        let mut results = Vec::new();
+        for r in rx.recv().await {
+            results.extend(r)
+        }
+        assert!(!results.is_empty());
+    }
+
+    #[tokio::test]
+    async fn handle_no_results() {
+        let (tx, _rx) = channel(1);
+        let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
+        assert!(matches!(
+            CertSpotter::default().run(host, tx).await.err().unwrap(),
+            VitaError::SourceError(_)
+        ));
+    }
+}
