@@ -23,3 +23,10 @@ impl Creds {
         }
     }
 }
+
+
+#[derive(Deserialize, Debug)]
+struct ChaosResult {
+    domain: String,
+    subdomains: Vec<String>,
+}
