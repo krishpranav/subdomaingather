@@ -17,3 +17,8 @@ impl IntoSubdomain for Vec<CertSpotterResult> {
         self.iter().flat_map(|d| d.dns_names.to_owned()).collect()
     }
 }
+
+#[derive(Defatul, Clone)]
+pub struct CertSpotter {
+    client: Client,
+}
