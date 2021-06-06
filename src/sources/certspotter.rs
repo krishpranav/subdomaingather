@@ -18,7 +18,7 @@ impl IntoSubdomain for Vec<CertSpotterResult> {
     }
 }
 
-#[derive(Defatul, Clone)]
+#[derive(Default, Clone)]
 pub struct CertSpotter {
     client: Client,
 }
@@ -36,7 +36,6 @@ impl CertSpotter {
         )
     }
 }
-
 
 #[async_trait]
 impl DataSource for CertSpotter {
@@ -56,10 +55,9 @@ impl DataSource for CertSpotter {
         }
 
         warn!("no results for {} from CertSpotter", &host);
-        Err(VitaError::SourceError("CertSpotter".into()))
+        Err(SubError::SourceError("CertSpotter".into()))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -96,7 +94,7 @@ mod tests {
         let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
         assert!(matches!(
             CertSpotter::default().run(host, tx).await.err().unwrap(),
-            VitaError::SourceError(_)
+            SubError::SourceError(_)
         ));
     }
 }
