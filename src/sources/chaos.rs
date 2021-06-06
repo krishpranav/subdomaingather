@@ -54,3 +54,70 @@ impl Chaos {
         format!("https://dns.projectdiscovery.io/dns/{}/subdomains", host)
     }
 }
+
+#[async_trait]
+impl DataSource for Chaos {
+    async fn run(&self, host: Arc<String>, mut tx: Sender<Vec<String>>) -> Result<()> {
+        trace!("fetching data from projectdiscovery choas for: {}", &host);
+        let api_key = match Creds::read_creds() {
+            Ok(creds) => creds.key,
+            Err(e) => return Err(e),
+        };
+        let uri = self.build_url(&host);
+        let resp = self
+            .client
+            .get(&uri)
+            .header(AUTHORIZATION, api_key)
+            .send()
+            .await?;
+
+        if resp.status().is_client_error() {
+            warn!("got status: {} from chaos", resp.status().as_str());
+            return Err(SubError::AuthError("Chaos".into()));
+        } else {
+            let resp: ChaosResult = resp.json().await?;
+            let subdomains = resp.subdomains();
+            if !subdomains.is_empty() {
+                info!("Discovered {} results for: {}", &subdomains.len(), &host);
+                let _ = tx.send(subdomains).await;
+                return Ok(());
+            }
+        }
+
+        warn!("no results for {} from Chaos", &host);
+        Err(SubError::SourceError("Chaos".into()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use matches::matches;
+    use tokio::sync::mpsc::channel;
+
+    // Ignore, passed locally.
+    #[ignore]
+    #[tokio::test]
+    async fn returns_results() {
+        let (tx, mut rx) = channel(1);
+        let host = Arc::new("hackerone.com".to_owned());
+        let _ = Chaos::default().run(host, tx).await;
+        let mut results = Vec::new();
+        for r in rx.recv().await {
+            results.extend(r)
+        }
+        assert!(!results.is_empty());
+    }
+
+    // Ignore, passed locally.
+    #[tokio::test]
+    #[ignore]
+    async fn handle_no_results() {
+        let (tx, _rx) = channel(1);
+        let host = Arc::new("anVubmxpa2VzdGVh.com".to_string());
+        assert!(matches!(
+            Chaos::default().run(host, tx).await.err().unwrap(),
+            SubError::SourceError(_)
+        ));
+    }
+}
