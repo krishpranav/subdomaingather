@@ -12,3 +12,9 @@ use tracing::{debug, info};
 pub struct SonarSearch {
     client: Client,
 }
+
+impl SonarSearch {
+    pub fn new(client: Client) -> Self {
+        Self { client }
+    }
+}
