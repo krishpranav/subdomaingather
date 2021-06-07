@@ -38,3 +38,9 @@ struct SpyseItem {
 struct Subdomain {
     name: String,
 }
+
+impl IntoSubdomain for SpyseResult {
+    fn subdomains(&self) -> Vec<String> {
+        self.data.items.iter().map(|i| i.name.to_owned()).collect()
+    }
+}
