@@ -23,3 +23,18 @@ impl Creds {
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+struct SpyseResult {
+    data: SpyseItem,
+}
+
+#[derive(Debug, Deserialize)]
+struct SpyseItem {
+    items: Vec<Subdomain>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Subdomain {
+    name: String,
+}
