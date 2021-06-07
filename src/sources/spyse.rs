@@ -13,3 +13,13 @@ use tracing::{info, trace, warn};
 struct Creds {
     token: String,
 }
+
+impl Creds {
+    pub fn read_creds() -> Result<Self> {
+        dotenv().ok();
+        match env::var("SPYSE_TOKEN") {
+            Ok(token) => Ok(Self { token }),
+            Err(_) => Err(SubError::UnsetKeys(vec!["SPYSE_TOKEN".into()])),
+        }
+    }
+}
