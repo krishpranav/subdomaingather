@@ -67,3 +67,7 @@ $ subdomaingather -d hackerone.com -e Wayback
 ```
 $ subdomaingather -d hackerone.com -v info
 ```
+
+# Credit
+
+- subdomaingather is based heavily on [vita](https://github.com/junnlikestea/vita) by [@junnlikestea](https://github.com/junnlikestea)
